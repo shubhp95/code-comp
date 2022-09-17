@@ -1,0 +1,6 @@
+#!/bin/bash
+if ( ! [ -d $1 ] ) then
+    mkdir -m ugo+w $1 $1/uploads
+    touch $1/history.txt
+    ###`scripts/clean_old_sessions`
+fi

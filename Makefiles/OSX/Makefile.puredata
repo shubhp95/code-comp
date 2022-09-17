@@ -1,0 +1,51 @@
+### The behaviour of this Makefile will only be correct if
+### only one .dsp file exists in the folder
+
+applname := $(faustfile:.dsp=)
+cppfile := $(faustfile:.dsp=.cpp)
+readme := ../../../images/element/README
+xmlfile := $(faustfile).xml
+pkgdir := $(faustfile:.dsp=-pkg)
+pkgfile := $(pkgdir).zip
+svgdir := $(faustfile)-svg
+svgfile := $(svgdir)/process.svg
+compBinaryfile 	:= $(applname).zip
+ARCH		:= puredata.cpp
+
+
+#binpkgdir  := $(faustfile:.dsp=-bin)
+binpkg     := $(faustfile:.dsp=-bin.zip)
+
+
+binary :
+	remoteOSX faust2puredata $(faustfile) $(oscOPT) $(httpdOPT)
+	zip -j binary.zip $(wildcard /usr/lib/pd/extra/faust*.pd  /usr/local/lib/pd/extra/faust*.pd /opt/lib/pd/extra/faust*.pd)
+	mv binary.zip $(compBinaryfile)
+	echo $(compBinaryfile) > binaryfilename.txt
+
+source : $(cppfile)
+
+patch : $(patchfile)
+
+source-pkg : $(pkgfile)
+	echo toto
+
+highlighted : $(cppfile)
+	highlight -V -t 4 -S cpp -i $(cppfile) -o highlighted
+
+svg : $(svgfile)
+
+mdoc : $(cppfile)
+	faust2mathdoc $(faustfile)
+
+clean :
+	rm -rf $(svgdir) $(pkgdir) $(binaryfile) $(pkgfile)
+
+###---------------------------------------------------------------
+
+$(cppfile) : $(faustfile)
+	if test -d $(DSPDEPTS);then dep=0;else cp $(DSPDEPTS) .;fi
+	faust -a $(ARCH) $(faustfile) $(OPT) -o $(cppfile) 2> errors.log
+
+$(svgfile) : $(cppfile)
+	faust $(faustfile) -svg $(OPT) >/dev/null 2> errors.log
